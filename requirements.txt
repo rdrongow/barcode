@@ -1,2 +1,2 @@
-pyBarcode==0.7
 Pillow==3.4.2
+pyBarcode==0.7
