@@ -1,6 +1,10 @@
 import barcode
 from barcode.writer import SVGWriter
 import os
+import tempfile
+from os import listdir
+from os.path import isfile, join
+from zipfile import ZipFile
 
 options = {
     "module_width": 0.3,
@@ -31,14 +35,37 @@ def create_eans(nr_eans):
     return eans
 
 
-def _csv_to_tuple(file_path):
+def _csv_to_tuple(fd):
     nr_eans = []
-    with open(file_path) as f:
+    with open(fd) as f:
         for line in f:
             if line == ';':
                 continue
             nr_eans.append(line.strip('\n').split(";"))
     return nr_eans
+
+
+def upload_to_tuple(fd):
+    nr_eans = []
+    for line in fd.readlines():
+        if line == ';':
+            continue
+        nr, ean = line.strip('\n').split(";")
+        nr = nr.replace('"', '').replace("'", "")
+        ean = ean.replace('"', '').replace("'", "")
+        nr_eans.append((nr, ean))
+    return nr_eans
+
+
+def create_zipfile(eans):
+    tempdir = tempfile.mkdtemp()
+    for nr, ean in eans:
+        ean.save('{}/{}'.format(tempdir, nr), options)
+    onlyfiles = [f for f in listdir(tempdir) if isfile(join(tempdir, f))]
+    with ZipFile('%s/eans.zip' % tempdir, 'w') as myzip:
+        for my_file in onlyfiles:
+            myzip.write(join(tempdir, my_file), my_file)
+    return '%s/eans.zip' % tempdir
 
 
 if __name__ == '__main__':
