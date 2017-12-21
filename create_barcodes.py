@@ -23,18 +23,30 @@ def svg_init(self, code):
 SVGWriter._init = svg_init
 
 
-def main():
-    file_path = raw_input("Enter path of file [eans.csv]: ") or "eans.csv"
-    output_to = raw_input("Enter name of output folder [eans]: ") or "eans"
-    if not os.path.exists(output_to):
-            os.makedirs(output_to)
+def create_eans(nr_eans):
+    eans = []
+    for nr, ean in nr_eans:
+        ean = barcode.get('ean13', ean)
+        eans.append((nr, ean))
+    return eans
+
+
+def _csv_to_tuple(file_path):
+    nr_eans = []
     with open(file_path) as f:
         for line in f:
-            artnr, ean = line.strip('\n').split(";")
-            print 'Create ean for {}'.format(artnr)
-            ean = barcode.get('ean13', ean)
-            ean.save('{}/{}'.format(output_to, artnr), options)
+            if line == ';':
+                continue
+            nr_eans.append(line.strip('\n').split(";"))
+    return nr_eans
 
 
 if __name__ == '__main__':
-    main()
+    file_path = raw_input("Enter path of file [eans.csv]: ") or "eans.csv"
+    output_to = raw_input("Enter name of output folder [eans]: ") or "eans"
+    nr_eans = _csv_to_tuple(file_path)
+    eans = create_eans(nr_eans)
+    if not os.path.exists(output_to):
+        os.makedirs(output_to)
+    for nr, ean in eans:
+        ean.save('{}/{}'.format(output_to, nr), options)
