@@ -19,3 +19,10 @@ Type `bin/python create_barcode.py`. You will be asked
 for a CSV file and an output folder. Afterwards the EANs
 will be written to the given folder.
 
+# Docker and WebApp
+
+Serve a small webapp from a docker container. Download docker
+and then execute with this repo as cwd:
+`docker build . -t barcodegen`
+`docker run -p 127.0.0.1:8080:8080 barcodegen`
+
